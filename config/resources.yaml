@@ -1,0 +1,14 @@
+---
+definitions:
+  post_type:
+    - PostType
+    - PostTypes
+  route:
+    - Route
+    - Routes
+  action:
+    - Action
+    - Actions
+  filter:
+    - Filter
+    - Filters
