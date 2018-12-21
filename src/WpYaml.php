@@ -74,7 +74,7 @@ final class WpYaml
         $configs = $this->get_files($this::CONFIG_PATH);
         foreach( $configs as $config ) {
             $config = Yaml::parseFile($config, Yaml::PARSE_CONSTANT);
-            $this->config = array_merge( $this->config, $config );
+            $this->config = array_merge($this->config, $config);
         }
     }
 
@@ -129,13 +129,13 @@ final class WpYaml
     */
     private function get_configs()
     {
-        if ( isset( $this->resources['plugin_directories'] ) && is_array( $this->resources['plugin_directories'] ) ) {
-          foreach ( $this->resources['plugin_directories'] as $path => &$configuration ){
-              foreach ( $this->config['definitions'] as $slug => $definition ){
-                  $config_path = $path . 'config/' . $definition[1] . '/';
-                  $configuration[ $slug ] = $this->get_files($config_path);
-              }
-          }
+        if (isset($this->resources['plugin_directories']) && is_array($this->resources['plugin_directories']) ) {
+            foreach ( $this->resources['plugin_directories'] as $path => &$configuration ){
+                foreach ( $this->config['definitions'] as $slug => $definition ){
+                    $config_path = $path . 'config/' . $definition[1] . '/';
+                    $configuration[ $slug ] = $this->get_files($config_path);
+                }
+            }
         }
     }
 
@@ -153,19 +153,19 @@ final class WpYaml
     */
     private function load_controllers()
     {
-      if ( isset( $this->resources['plugin_directories'] ) && is_array( $this->resources['plugin_directories'] ) ) {
-        foreach ( $this->resources['plugin_directories'] as $path => &$configuration ){
-            foreach ( $configuration as $config_type => $config_files ) {
-                foreach ( $config_files as $config_file ) {
-                    $className = '\\WpYaml\\ResourceControllers\\' . $this->config['definitions'][ $config_type ][0];
-                    $config = Yaml::parseFile($config_file);
-                    $this->resources['controllers'][$path][]
-                    =
-                    new $className($config);
+        if (isset($this->resources['plugin_directories']) && is_array($this->resources['plugin_directories']) ) {
+            foreach ( $this->resources['plugin_directories'] as $path => &$configuration ){
+                foreach ( $configuration as $config_type => $config_files ) {
+                    foreach ( $config_files as $config_file ) {
+                        $className = '\\WpYaml\\ResourceControllers\\' . $this->config['definitions'][ $config_type ][0];
+                        $config = Yaml::parseFile($config_file);
+                        $this->resources['controllers'][$path][]
+                        =
+                        new $className($config);
+                    }
                 }
             }
         }
-      }
     }
 
     /*
@@ -182,13 +182,13 @@ final class WpYaml
     */
     private function set_controllers()
     {
-      if ( isset( $this->resources['controllers'] ) && is_array( $this->resources['controllers'] ) ) {
-        foreach ( $this->resources['controllers'] as $path => $controllers ){
-            foreach( $controllers as $controller ) {
-                $controller->setup();
+        if (isset($this->resources['controllers']) && is_array($this->resources['controllers']) ) {
+            foreach ( $this->resources['controllers'] as $path => $controllers ){
+                foreach( $controllers as $controller ) {
+                    $controller->setup();
+                }
             }
         }
-    }
     }
 
     /*
@@ -205,13 +205,13 @@ final class WpYaml
     */
     public function process()
     {
-      if ( isset( $this->resources['controllers'] ) && is_array( $this->resources['controllers'] ) ) {
-        foreach ( $this->resources['controllers'] as $path => $controllers ){
-            foreach( $controllers as $controller ) {
-                $controller->process();
+        if (isset($this->resources['controllers']) && is_array($this->resources['controllers']) ) {
+            foreach ( $this->resources['controllers'] as $path => $controllers ){
+                foreach( $controllers as $controller ) {
+                    $controller->process();
+                }
             }
         }
-      }
     }
 
     /*
