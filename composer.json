@@ -1,0 +1,27 @@
+{
+        "name"       : "wp-yaml/wp-yaml",
+        "description": "Yaml resource registration for WordPress",
+        "homepage"   : "http://wp-yaml.com",
+        "type"       : "wordpress-muplugin",
+        "license"    : "GPL-2.0+",
+        "authors"    : [
+                {
+                        "name"    : "Nicholas Bateman",
+                        "homepage": "http://wp-yaml.com/"
+                }
+        ],
+        "autoload" : {
+            "psr-4" : {
+                "WpYaml\\" : "src"
+            }
+        },
+        "require": {
+                "composer/installers":      "~1.0",
+                "symfony/yaml":             "3.x",
+                "symfony/finder":           "3.x"
+
+        },
+        "require-dev": {
+                "wp-coding-standards/wpcs": "^0.14.1"
+        }
+}

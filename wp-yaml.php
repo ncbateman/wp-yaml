@@ -1,0 +1,19 @@
+<?php
+
+/*
+Plugin Name: Wp Yaml
+Version:     1.0
+Description: Yaml resource registration for WordPress
+Author:      Nicholas Bateman
+*/
+
+namespace WpYaml;
+
+define( 'WP_YAML_PATH', plugin_dir_path( __FILE__ ) );
+define( 'WP_YAML_URL', plugin_dir_url( __FILE__ ) );
+
+if ( ! class_exists( 'WpYaml\WpYaml' ) ) {
+	require_once WP_YAML_PATH . '/vendor/autoload.php';
+}
+
+WpYaml::init();
