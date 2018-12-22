@@ -146,3 +146,5 @@ example-posttype:
   - revisions
   - title
 ```
+
+You may have as many post types per config file as you like, however, for simplicity of organisation 1 per file feels best.
