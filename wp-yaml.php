@@ -2,7 +2,7 @@
 
 /*
 Plugin Name: Wp Yaml
-Version:     1.0
+Version:     1.1
 Description: Yaml resource registration for WordPress
 Author:      Nicholas Bateman
 */
