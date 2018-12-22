@@ -5,7 +5,7 @@ wp-yaml is a plugin to facilitate registration of WordPress resources within plu
 
 ## Plugin / theme registration. 
 
-** For a working example see: [wp-yaml-example-plugin](https://github.com/ncbateman/wp-yaml-example-plugin)**
+**For a working example see: [wp-yaml-example-plugin](https://github.com/ncbateman/wp-yaml-example-plugin)**
 
 To register a plugin or theme with wp-yaml, the wp-yaml plugin must be installed and activated. 
 
