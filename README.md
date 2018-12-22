@@ -56,6 +56,8 @@ actions:
     action_b:
       hook: admin_enqueue_scripts
       method: method_name_b
+      priority: 5
+      args: 1
 ```
 
 You may register as many methods per callback as you like, but only one callback class per config file. You may have as many Action config files as you like to utilise multiple callback classes.
