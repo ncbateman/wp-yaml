@@ -60,6 +60,8 @@ actions:
 
 You may register as many methods per callback as you like, but only one callback class per config file. You may have as many Action config files as you like to utilise multiple callback classes.
 
+The priority and args values are optional as per wordpress.
+
 
 ## Registering Filters
 
@@ -72,12 +74,16 @@ filters:
     filter_a:
       hook: admin_enqueue_scripts
       method: method_name_a
+      priority: 5
+      args: 1
     filter_b:
       hook: admin_enqueue_scripts
       method: method_name_b
 ```
 
 As with actions, you may register as many methods per callback as you like, but only one callback class per config file. You may have as many Filter config files as you like to utilise multiple callback classes.
+
+The priority and args values are optional as per wordpress.
 
 ## Registering Routes
 
