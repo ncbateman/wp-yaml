@@ -5,22 +5,22 @@ namespace WpYaml\ResourceControllers;
 class ResourceController
 {
 
-    private $config;
+    protected $config;
 
     function __construct( $config )
     {
-        if (! isset($config) && empty($config) ) {
+        if (! isset($config) || empty($config) ) {
             die("wp-yaml fatal error - missing configuration");
         }
         $this->config = $config;
     }
 
-    protected function setup()
+    public function setup()
     {
         return true;
     }
 
-    protected function process()
+    public function process()
     {
         return true;
     }

@@ -32,8 +32,8 @@ final class WpYaml
     private function __construct()
     {
         $this->init_config();
-        add_action('plugins_loaded', [ $this, 'setup' ]);
-        add_action('init', [ $this, 'process_controllers' ]);
+        add_action('setup_theme', [ $this, 'set' ]);
+        add_action('init', [ $this, 'process' ]);
     }
 
     /*
@@ -57,65 +57,6 @@ final class WpYaml
     }
 
     /*
-    *  register
-    *
-    *  Public register function for manual config directory registration.
-    *
-    *  @type    function
-    *  @date    21/12/18
-    *  @since    0.0.0.1
-    *
-    *  @param    N/A
-    *  @return    N/A
-    */
-    public function register( $path )
-    {
-        $this->resources['plugin_directories'][ $path ]['resources'] = [];
-    }
-
-    /*
-    *  setup
-    *
-    *  Instantiates and prepares resource controllers for running on init.
-    *
-    *  @type    function
-    *  @date    21/12/18
-    *  @since    0.0.0.1
-    *
-    *  @param    N/A
-    *  @return    N/A
-    */
-    public function setup()
-    {
-        $this->get_configs();
-        $this->load_controllers();
-        $this->setup_controllers();
-    }
-
-    /*
-    *  process
-    *
-    *  Runs process on each registered resource controller
-    *
-    *  @type    function
-    *  @date    21/12/18
-    *  @since    0.0.0.1
-    *
-    *  @param    N/A
-    *  @return    N/A
-    */
-    public function process_controllers()
-    {
-        if (isset($this->resources['controllers']) && is_array($this->resources['controllers']) ) {
-            foreach ( $this->resources['controllers'] as $path => $controllers ){
-                foreach( $controllers as $controller ) {
-                    $controller->process();
-                }
-            }
-        }
-    }
-
-    /*
     *  init_config
     *
     *  Gets local config files, parses them and updates the private config member
@@ -133,8 +74,44 @@ final class WpYaml
         $configs = $this->get_files($this::CONFIG_PATH);
         foreach( $configs as $config ) {
             $config = Yaml::parseFile($config, Yaml::PARSE_CONSTANT);
-            $this->config = array_merge($this->config, $config);
+            $this->config = array_merge( $this->config, $config );
         }
+    }
+
+    /*
+    *  register
+    *
+    *  Public register function for manual config directory registration.
+    *
+    *  @type    function
+    *  @date    21/12/18
+    *  @since    0.0.0.1
+    *
+    *  @param    N/A
+    *  @return    N/A
+    */
+    public function register( $path )
+    {
+        $this->resources['plugin_directories'][ $path ] = [];
+    }
+
+    /*
+    *  set
+    *
+    *  Instantiates and prepares resource controllers for running on init.
+    *
+    *  @type    function
+    *  @date    21/12/18
+    *  @since    0.0.0.1
+    *
+    *  @param    N/A
+    *  @return    N/A
+    */
+    public function set()
+    {
+        $this->get_configs();
+        $this->load_controllers();
+        $this->set_controllers();
     }
 
     /*
@@ -152,13 +129,13 @@ final class WpYaml
     */
     private function get_configs()
     {
-        if (isset($this->resources['plugin_directories']) && is_array($this->resources['plugin_directories']) ) {
-            foreach ( $this->resources['plugin_directories'] as $path => &$configuration ){
-                foreach ( $this->config['definitions'] as $slug => $definition ){
-                    $config_path = $path . 'config/' . $definition[1] . '/';
-                    $configuration[ $slug ] = $this->get_files($config_path);
-                }
-            }
+        if ( isset( $this->resources['plugin_directories'] ) && is_array( $this->resources['plugin_directories'] ) ) {
+          foreach ( $this->resources['plugin_directories'] as $path => &$configuration ){
+              foreach ( $this->config['definitions'] as $slug => $definition ){
+                  $config_path = $path . $definition[1] . '/';
+                  $configuration[ $slug ] = $this->get_files($config_path);
+              }
+          }
         }
     }
 
@@ -176,23 +153,24 @@ final class WpYaml
     */
     private function load_controllers()
     {
-        if (isset($this->resources['plugin_directories']) && is_array($this->resources['plugin_directories']) ) {
-            foreach ( $this->resources['plugin_directories'] as $path => &$configuration ){
-                foreach ( $configuration as $config_type => $config_files ) {
-                    foreach ( $config_files as $config_file ) {
-                        $className = '\\WpYaml\\ResourceControllers\\' . $this->config['definitions'][ $config_type ][0];
-                        $config = Yaml::parseFile($config_file);
-                        $this->resources['controllers'][$path][]
-                        =
-                        new $className($config);
-                    }
+      if ( isset( $this->resources['plugin_directories'] ) && is_array( $this->resources['plugin_directories'] ) ) {
+        foreach ( $this->resources['plugin_directories'] as $path => &$configuration ){
+            // var_dump($configuration);
+            foreach ( $configuration as $config_type => $config_files ) {
+                foreach ( $config_files as $config_file ) {
+                    $className = '\\WpYaml\\ResourceControllers\\' . $this->config['definitions'][ $config_type ][0];
+                    $config = Yaml::parseFile($config_file);
+                    $this->resources['controllers'][$path][]
+                    =
+                    new $className($config);
                 }
             }
         }
+      }
     }
 
     /*
-    *  setup_controllers
+    *  set_controllers
     *
     *  Runs setup on each registered resource controller
     *
@@ -203,15 +181,38 @@ final class WpYaml
     *  @param    N/A
     *  @return    N/A
     */
-    private function setup_controllers()
+    private function set_controllers()
     {
-        if (isset($this->resources['controllers']) && is_array($this->resources['controllers']) ) {
-            foreach ( $this->resources['controllers'] as $path => $controllers ){
-                foreach( $controllers as $controller ) {
-                    $controller->setup();
-                }
+      if ( isset( $this->resources['controllers'] ) && is_array( $this->resources['controllers'] ) ) {
+        foreach ( $this->resources['controllers'] as $path => $controllers ){
+            foreach( $controllers as $controller ) {
+                $controller->setup();
             }
         }
+    }
+    }
+
+    /*
+    *  process
+    *
+    *  Runs process on each registered resource controller
+    *
+    *  @type    function
+    *  @date    21/12/18
+    *  @since    0.0.0.1
+    *
+    *  @param    N/A
+    *  @return    N/A
+    */
+    public function process()
+    {
+      if ( isset( $this->resources['controllers'] ) && is_array( $this->resources['controllers'] ) ) {
+        foreach ( $this->resources['controllers'] as $path => $controllers ){
+            foreach( $controllers as $controller ) {
+                $controller->process();
+            }
+        }
+      }
     }
 
     /*
