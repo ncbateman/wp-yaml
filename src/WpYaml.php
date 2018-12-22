@@ -32,7 +32,7 @@ final class WpYaml
     private function __construct()
     {
         $this->init_config();
-        add_action('setup_theme', [ $this, 'set' ]);
+        add_action('setup_theme', [ $this, 'setup' ]);
         add_action('init', [ $this, 'process' ]);
     }
 
@@ -107,7 +107,7 @@ final class WpYaml
     *  @param    N/A
     *  @return    N/A
     */
-    public function set()
+    public function setup()
     {
         $this->get_configs();
         $this->load_controllers();
