@@ -16,12 +16,12 @@
             }
         },
         "require": {
-                "composer/installers":      "~1.0",
-                "symfony/yaml":             "3.x",
-                "symfony/finder":           "3.x"
+                "composer/installers":      "2.x",
+                "symfony/yaml":             "5.x",
+                "symfony/finder":           "5.x"
 
         },
         "require-dev": {
-                "wp-coding-standards/wpcs": "^0.14.1"
+                "wp-coding-standards/wpcs": "2.x"
         }
 }
