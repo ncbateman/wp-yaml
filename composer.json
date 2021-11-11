@@ -1,5 +1,5 @@
 {
-        "name"       : "wp-yaml/wp-yaml",
+        "name"       : "sylvera/wp-yaml",
         "description": "Yaml resource registration for WordPress",
         "homepage"   : "http://wp-yaml.com",
         "type"       : "wordpress-muplugin",
