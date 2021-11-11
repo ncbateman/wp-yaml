@@ -13,7 +13,11 @@ define( 'WP_YAML_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WP_YAML_URL', plugin_dir_url( __FILE__ ) );
 
 if ( ! class_exists( 'WpYaml\WpYaml' ) ) {
-	require_once WP_YAML_PATH . '/vendor/autoload.php';
+    if (is_file(WP_YAML_PATH . '/vendor/autoload.php')) {
+        require_once WP_YAML_PATH . '/vendor/autoload.php';
+    } elseif (is_file(WP_YAML_PATH . '../../../vendor/autoload.php')) {
+        require_once WP_YAML_PATH . '../../../vendor/autoload.php';
+    }
 }
 
 WpYaml::init();
