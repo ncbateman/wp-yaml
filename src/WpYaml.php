@@ -1,14 +1,21 @@
 <?php
 
+// phpcs:disable PSR1.Methods.CamelCapsMethodName
+
 namespace WpYaml;
 
 use Symfony\Component\Yaml\Yaml as Yaml;
 use Symfony\Component\Finder\Finder as Finder;
 
+/**
+ * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+ * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+ * @SuppressWarnings(PHPMD.CamelCasePropertyName)
+ */
 final class WpYaml
 {
-
-    const CONFIG_PATH = WP_YAML_PATH . '/config/';
+    /** @psalm-suppress UndefinedConstant */
+    public const CONFIG_PATH = WP_YAML_PATH . '/config/';
 
     private static $wp_yaml;
 
@@ -50,10 +57,20 @@ final class WpYaml
     */
     public static function init()
     {
-        if (! isset(self::$wp_yaml) ) {
-            self::$wp_yaml = new self;
+        if (! isset(self::$wp_yaml)) {
+            self::$wp_yaml = new self();
         }
         return self::$wp_yaml;
+    }
+
+    public function resources()
+    {
+        return $this->resources;
+    }
+
+    public function config()
+    {
+        return $this->config;
     }
 
     /*
@@ -69,12 +86,15 @@ final class WpYaml
     *  @param    N/A
     *  @return    N/A
     */
+    /**
+     * @SuppressWarnings(PHPMD.StaticAccess)
+     */
     private function init_config()
     {
         $configs = $this->get_files($this::CONFIG_PATH);
-        foreach( $configs as $config ) {
+        foreach ($configs as $config) {
             $config = Yaml::parseFile($config, Yaml::PARSE_CONSTANT);
-            $this->config = array_merge( $this->config, $config );
+            $this->config = array_merge($this->config, $config);
         }
     }
 
@@ -90,7 +110,7 @@ final class WpYaml
     *  @param    N/A
     *  @return    N/A
     */
-    public function register( $path )
+    public function register($path)
     {
         $this->resources['plugin_directories'][ $path ] = [];
     }
@@ -129,13 +149,13 @@ final class WpYaml
     */
     private function get_configs()
     {
-        if ( isset( $this->resources['plugin_directories'] ) && is_array( $this->resources['plugin_directories'] ) ) {
-          foreach ( $this->resources['plugin_directories'] as $path => &$configuration ){
-              foreach ( $this->config['definitions'] as $slug => $definition ){
-                  $config_path = $path . $definition[1] . '/';
-                  $configuration[ $slug ] = $this->get_files($config_path);
-              }
-          }
+        if (isset($this->resources['plugin_directories']) && is_array($this->resources['plugin_directories'])) {
+            foreach ($this->resources['plugin_directories'] as $path => &$configuration) {
+                foreach ($this->config['definitions'] as $slug => $definition) {
+                    $config_path = $path . $definition[1] . '/';
+                    $configuration[ $slug ] = $this->get_files($config_path);
+                }
+            }
         }
     }
 
@@ -151,22 +171,25 @@ final class WpYaml
     *  @param    N/A
     *  @return    N/A
     */
+    /**
+     * @SuppressWarnings(PHPMD.StaticAccess)
+     */
     private function load_controllers()
     {
-      if ( isset( $this->resources['plugin_directories'] ) && is_array( $this->resources['plugin_directories'] ) ) {
-        foreach ( $this->resources['plugin_directories'] as $path => &$configuration ){
-            // var_dump($configuration);
-            foreach ( $configuration as $config_type => $config_files ) {
-                foreach ( $config_files as $config_file ) {
-                    $className = '\\WpYaml\\ResourceControllers\\' . $this->config['definitions'][ $config_type ][0];
-                    $config = Yaml::parseFile($config_file);
-                    $this->resources['controllers'][$path][]
-                    =
-                    new $className($config);
+        if (isset($this->resources['plugin_directories']) && is_array($this->resources['plugin_directories'])) {
+            foreach ($this->resources['plugin_directories'] as $path => &$configuration) {
+                // var_dump($configuration);
+                foreach ($configuration as $config_type => $config_files) {
+                    foreach ($config_files as $config_file) {
+                        $className = '\\WpYaml\\ResourceControllers\\' . $this->config['definitions'][ $config_type ][0];
+                        $config = Yaml::parseFile($config_file);
+                        $this->resources['controllers'][$path][]
+                        =
+                        new $className($config, $this->resources);
+                    }
                 }
             }
         }
-      }
     }
 
     /*
@@ -183,13 +206,13 @@ final class WpYaml
     */
     private function set_controllers()
     {
-      if ( isset( $this->resources['controllers'] ) && is_array( $this->resources['controllers'] ) ) {
-        foreach ( $this->resources['controllers'] as $path => $controllers ){
-            foreach( $controllers as $controller ) {
-                $controller->setup();
+        if (isset($this->resources['controllers']) && is_array($this->resources['controllers'])) {
+            foreach ($this->resources['controllers'] as $controllers) {
+                foreach ($controllers as $controller) {
+                    $controller->setup();
+                }
             }
         }
-    }
     }
 
     /*
@@ -206,13 +229,13 @@ final class WpYaml
     */
     public function process()
     {
-      if ( isset( $this->resources['controllers'] ) && is_array( $this->resources['controllers'] ) ) {
-        foreach ( $this->resources['controllers'] as $path => $controllers ){
-            foreach( $controllers as $controller ) {
-                $controller->process();
+        if (isset($this->resources['controllers']) && is_array($this->resources['controllers'])) {
+            foreach ($this->resources['controllers'] as $controllers) {
+                foreach ($controllers as $controller) {
+                    $controller->process();
+                }
             }
         }
-      }
     }
 
     /*
@@ -228,18 +251,17 @@ final class WpYaml
     *  @param    N/A
     *  @return    N/A
     */
-    private function get_files( $path )
+    private function get_files($path)
     {
-        if (! file_exists($path) ) {
+        if (! file_exists($path)) {
             return [];
         }
         $fileFinder = new Finder();
         $fileFinder->files()->in($path);
         $filesArray = [];
-        foreach ( $fileFinder as $file ) {
+        foreach ($fileFinder as $file) {
             $filesArray[] = $file->getRealPath();
         }
         return $filesArray;
     }
-
 }
