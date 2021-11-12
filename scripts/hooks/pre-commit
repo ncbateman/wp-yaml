@@ -1,0 +1,101 @@
+#!/bin/sh
+
+########################################################################################################################
+#
+# Hook assumes we're using tooling installed via homebrew (in /opt/homebrew/bin/) on a mac
+#
+# Required to be installed via homebrew:
+#   - PHP
+#   - phpmd
+#   - phpcs
+#   - phpcbf (part of phpcs)
+#   - psalm
+#   - php-cs-fixer
+#
+# Also assumes that phpunit is installed via composer & that git is available
+# (weird to use a githook without it though)
+#
+# If this ever changes, we'll need to revisit the script.
+#
+########################################################################################################################
+
+PROJECT=`/opt/homebrew/bin/php -r "echo dirname(dirname(dirname(realpath('$0'))));"`
+STAGED_FILES_CMD=`git diff --cached --name-only --diff-filter=ACMR HEAD | grep \\\\.php`
+
+# Determine if a file list is passed
+if [ "$#" -eq 1 ]
+then
+	oIFS=$IFS
+	IFS='
+	'
+	SFILES="$1"
+	IFS=$oIFS
+fi
+SFILES=${SFILES:-$STAGED_FILES_CMD}
+
+echo "Running PHP Lint"
+for FILE in $SFILES
+do
+	/opt/homebrew/bin/php -l -d display_errors=0 $PROJECT/$FILE
+	if [ $? != 0 ]
+	then
+		echo "PHP Lint Error: Fix the error before commit."
+		exit 1
+	fi
+	FILES="$FILES $PROJECT/$FILE"
+done
+
+echo "Running PHP-CS-FIXER"
+for FILE in $SFILES
+do
+	/opt/homebrew/bin/php-cs-fixer fix -q $PROJECT/$FILE --rules=@PSR12
+done
+
+echo "Running PHPMD"
+for FILE in $SFILES
+do
+	/opt/homebrew/bin/php -d error_reporting=24575 /opt/homebrew/bin/phpmd $PROJECT/$FILE text cleancode,codesize,controversial,design,naming,unusedcode --exclude tests/*
+	if [ $? != 0 ]
+	then
+    echo "Mess Detector Errors Found: Fix or suppress as required"
+		exit 1
+	fi
+done
+
+echo "Running Code Sniffer..."
+if [ "$FILES" != "" ]
+then
+	/opt/homebrew/bin/phpcs --standard=PSR12 --encoding=utf-8 -n -p $FILES
+	if [ $? != 0 ]
+	then
+		echo "Coding standards errors have been detected. Running phpcbf..."
+		/opt/homebrew/bin/phpcbf --standard=PSR12 --encoding=utf-8 -n -p $FILES
+		git add $FILES
+		echo "Running Code Sniffer again..."
+		/opt/homebrew/bin/phpcs --standard=PSR12 --encoding=utf-8 -n -p $FILES
+		if [ $? != 0 ]
+		then
+			echo "PHPCS Errors found not fixable automatically"
+			exit 1
+		fi
+	fi
+fi
+
+echo "Running Psalm..."
+if [ "$FILES" != "" ]
+then
+	/opt/homebrew/bin/psalm -m --output-format=text $FILES
+	if [ $? != 0 ]
+  then
+    echo "Psalm Errors found: fix or suppress as required"
+    exit 1
+  fi
+fi
+
+echo "Running PHPUnit tests..."
+XDEBUG_MODE=coverage /opt/homebrew/bin/php ./vendor/bin/phpunit --coverage-html=unitTestCoverage
+
+echo "Running local-php-security-checker..."
+local-php-security-checker
+
+exit $?

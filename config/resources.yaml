@@ -12,3 +12,9 @@ definitions:
   filter:
     - Filter
     - Filters
+  user:
+    - User
+    - Users
+  field-group:
+    - FieldGroup
+    - FieldGroups
