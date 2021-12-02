@@ -31,8 +31,25 @@ class User extends ResourceController
     public function process()
     {
         foreach ($this->config as $role => $args) {
-            //remove_role( $role );
-            add_role($role, $args['display_name'], $args['capabilities']);
+            $wpRole = get_role($role);
+            if ($wpRole instanceof \WP_Role) {
+                $requiredCapabilities = [];
+                foreach ($args['capabilities'] as $capability => $granted) {
+                    if (true === boolval($granted)) {
+                        $requiredCapabilities[] = $capability;
+                        if (false === $wpRole->has_cap($capability)) {
+                            $wpRole->add_cap($capability);
+                        }
+                    }
+                }
+                foreach ($wpRole->capabilities as $capability => $granted) {
+                    if (false === in_array($capability, $requiredCapabilities)) {
+                        $wpRole->remove_cap($capability);
+                    }
+                }
+            } else {
+                add_role($role, $args['display_name'], $args['capabilities']);
+            }
         }
     }
 
