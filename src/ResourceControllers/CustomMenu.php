@@ -4,6 +4,8 @@
 
 namespace WpYaml\ResourceControllers;
 
+use Exception;
+
 /**
  * @SuppressWarnings(PHPMD.CamelCaseVariableName)
  * @SuppressWarnings(PHPMD.CamelCaseMethodName)
@@ -26,15 +28,20 @@ class CustomMenu extends ResourceController
     {
         foreach ($this->config as $menu) {
             if (!isset($menu['capability'])) {
-                throw new \Exception('capability is required for ' . $menu['type']);
+                throw new Exception('capability is required for ' . $menu['type']);
             }
 
-            if ($menu['type'] === 'main_menu') {
-                $this->_loadMainMenu($menu);
-            }
-
-            if ($menu['type'] === 'sub_menu') {
-                $this->_loadSubMenu($menu);
+            switch ($menu['type']) {
+            case 'main_menu':
+                $this->loadMainMenu($menu);
+                break;
+            case 'sub_menu':
+                $this->loadSubMenu($menu);
+                break;
+            default:
+                throw new Exception(
+                    'invalid menu type, valid values are "main_menu" or "sub_menu"'
+                );
             }
         }
     }
@@ -46,7 +53,7 @@ class CustomMenu extends ResourceController
      *
      * @return void
      */
-    private function _loadMainMenu(array $menu): void
+    private function loadMainMenu(array $menu): void
     {
         if (isset($menu['callback']) && isset($menu['method'])) {
             $callback = function () use ($menu) {
@@ -82,7 +89,7 @@ class CustomMenu extends ResourceController
      *
      * @return void|WP_Error
      */
-    private function _loadSubMenu(array $menu)
+    private function loadSubMenu(array $menu)
     {
         if (!isset($menu['callback']) || !isset($menu['method'])) {
             throw new \Exception('callback and method are required for sub_menu');
