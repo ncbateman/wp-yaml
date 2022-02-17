@@ -178,7 +178,6 @@ final class WpYaml
     {
         if (isset($this->resources['plugin_directories']) && is_array($this->resources['plugin_directories'])) {
             foreach ($this->resources['plugin_directories'] as $path => &$configuration) {
-                // var_dump($configuration);
                 foreach ($configuration as $config_type => $config_files) {
                     foreach ($config_files as $config_file) {
                         $className = '\\WpYaml\\ResourceControllers\\' . $this->config['definitions'][ $config_type ][0];

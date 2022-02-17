@@ -22,14 +22,17 @@ example-config-dir
 ├── PostTypes
 │   ├── PostType1.yaml
 │   └── PostType2.yaml
-└── Routes
-    ├── Route1.yaml
-    └── Route2.yaml
+├── Routes
+│   ├── Route1.yaml
+│   └── Route2.yaml
+└── CustomMenus
+    ├── CustomMenu1.yaml
+    └── CustomMenu2.yaml
 ```
 
 The theme / plugin must contain the following snippet of code: 
 
-```
+```php
 use WpYaml\WpYaml as WpYaml;
 
 add_action('muplugins_loaded', function () {
@@ -48,7 +51,7 @@ Once registered, the wp-yaml plugin with ingest and register all resources defin
 
 Action config files must be structed as follows:
 
-```
+```yaml
 ---
 callback: Full\Callback\Class\Namespace
 actions:
@@ -71,7 +74,7 @@ The priority and args values are optional as per wordpress.
 
 Filter config files must be structed as follows:
 
-```
+```yaml
 ---
 callback: Full\Callback\Class\Namespace
 filters:
@@ -95,7 +98,7 @@ Routes have a very light config file as most of the work is done by the route cl
 
 Route config files must be structured as follows: 
 
-```
+```yaml
 ---
 routes:
   route_a: Full\WP_REST_Controller\Class\NamespaceA
@@ -108,7 +111,7 @@ Post Types are entirely defined in the config file and use no callback class.
 
 Post Type config files must be structured as follows: 
 
-```
+```yaml
 ---
 example-posttype:
   labels:
@@ -158,3 +161,51 @@ example-posttype:
 ```
 
 You may have as many post types per config file as you like, however, for simplicity of organisation 1 per file feels best.
+
+## Registering Custom Menus
+
+You can also add Custom admin menus, you need to pass names, slugs and a callback function.
+
+The config files must be structured as follows:
+
+```yaml
+---
+my_main_menu:
+  type: main_menu
+  label: My Main menu
+  slug: my_main_menu
+  capability: some_wordpress_capability
+  icon: dashicons-welcome-widgets-menus
+  position: 58
+  callback: My\Callback\Class
+  method: callbackMethod
+  data:
+    param1: value1
+    param2: value2
+my_sub_menu:
+  type: sub_menu
+  label: My submenu
+  parent: my_main_menu
+  slug: my_sub_menu
+  capability: some_wordpress_capability
+  callback: My\Callback\Class
+  method: callbackMethod
+  data:
+    param1: value1
+    param2: value2
+
+```
+
+Notes on custom menus: the `type` value has to be `main_menu` or `sub_menu`. The `callback` and `method` are not required for `main_menu` but are required for `sub_menu`. The `parent` field is required for `sub_menu`. The `data` will be sent to the callback function as an array. An example implementation would look like:
+
+```php
+namespace My\Callback;
+
+class Class
+{
+    public function callbackMethod(array $data)
+    {
+        //work with your data here
+    }
+}
+```
