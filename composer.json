@@ -25,5 +25,15 @@
                 "wp-coding-standards/wpcs": "2.x",
                 "humanmade/psalm-plugin-wordpress": "^2.0",
                 "phpunit/phpunit": "^9.5"
+        },
+        "scripts": {
+            "post-install-cmd": [
+                "./scripts/symlink.sh"
+            ]
+        },
+        "config": {
+                "allow-plugins": {
+                        "composer/installers": true
+                }
         }
 }
