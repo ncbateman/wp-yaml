@@ -32,16 +32,16 @@ class CustomMenu extends ResourceController
             }
 
             switch ($menu['type']) {
-            case 'main_menu':
-                $this->loadMainMenu($menu);
-                break;
-            case 'sub_menu':
-                $this->loadSubMenu($menu);
-                break;
-            default:
-                throw new Exception(
-                    'invalid menu type, valid values are "main_menu" or "sub_menu"'
-                );
+                case 'main_menu':
+                    $this->loadMainMenu($menu);
+                    break;
+                case 'sub_menu':
+                    $this->loadSubMenu($menu);
+                    break;
+                default:
+                    throw new Exception(
+                        'invalid menu type, valid values are "main_menu" or "sub_menu"'
+                    );
             }
         }
     }
@@ -55,6 +55,7 @@ class CustomMenu extends ResourceController
      */
     private function loadMainMenu(array $menu): void
     {
+        $callback = [$this, 'defaultCallback'];
         if (isset($menu['callback']) && isset($menu['method'])) {
             $callback = function () use ($menu) {
                 call_user_func_array(
@@ -67,8 +68,6 @@ class CustomMenu extends ResourceController
                     ]
                 );
             };
-        } else {
-            $callback = [$this, 'defaultCallback'];
         }
 
         add_menu_page(
@@ -87,16 +86,16 @@ class CustomMenu extends ResourceController
      *
      * @param array $menu metadata from yaml config file
      *
-     * @return void|WP_Error
+     * @return void
      */
     private function loadSubMenu(array $menu)
     {
         if (!isset($menu['callback']) || !isset($menu['method'])) {
-            throw new \Exception('callback and method are required for sub_menu');
+            throw new Exception('callback and method are required for sub_menu');
         }
 
         if (!isset($menu['parent'])) {
-            throw new \Exception('parent is required for sub_menu');
+            throw new Exception('parent is required for sub_menu');
         }
 
         add_submenu_page(
