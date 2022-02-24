@@ -2,24 +2,34 @@
 
 ########################################################################################################################
 #
-# Hook assumes we're using tooling installed via homebrew (in /opt/homebrew/bin/) on a mac
+# Hook assumes we're using tooling installed via homebrew on a mac and are available in your $PATH
 #
 # Required to be installed via homebrew:
-#   - PHP
-#   - phpmd
-#   - phpcs
+#   - PHP - brew install php@7.4
+#   - phpmd - brew install phpmd
+#   - phpcs - brew install php-code-sniffer
 #   - phpcbf (part of phpcs)
-#   - psalm
-#   - php-cs-fixer
+#   - psalm - brew install psalm. At the moment of this update, you have to use version 4.18.1, homebrew
+#             complicates a lot rolling back to older versions. Thanks to this page (https://cmichel.io/how-to-install-an-old-package-version-with-brew/)
+#             I could install it. In short you need to run:
+#               - brew tap-new $USER/local-psalm
+#               - brew extract --version=4.18.1 psalm $USER/local-psalm
+#               - brew install psalm@4.18.1
+#   - php-cs-fixer - brew install php-cs-fixer
 #
 # Also assumes that phpunit is installed via composer & that git is available
 # (weird to use a githook without it though)
+#
+# Install local-php-security-checker manually from here
+# https://github.com/fabpot/local-php-security-checker
+#
+# Also install redoc-cli following the instructions in the README file
 #
 # If this ever changes, we'll need to revisit the script.
 #
 ########################################################################################################################
 
-PROJECT=`/opt/homebrew/bin/php -r "echo dirname(dirname(dirname(realpath('$0'))));"`
+PROJECT=`php -r "echo dirname(dirname(dirname(realpath('$0'))));"`
 STAGED_FILES_CMD=`git diff --cached --name-only --diff-filter=ACMR HEAD | grep \\\\.php`
 
 # Determine if a file list is passed
@@ -36,7 +46,7 @@ SFILES=${SFILES:-$STAGED_FILES_CMD}
 echo "Running PHP Lint"
 for FILE in $SFILES
 do
-	/opt/homebrew/bin/php -l -d display_errors=0 $PROJECT/$FILE
+	php -l -d display_errors=0 $PROJECT/$FILE
 	if [ $? != 0 ]
 	then
 		echo "PHP Lint Error: Fix the error before commit."
@@ -48,13 +58,13 @@ done
 echo "Running PHP-CS-FIXER"
 for FILE in $SFILES
 do
-	/opt/homebrew/bin/php-cs-fixer fix -q $PROJECT/$FILE --rules=@PSR12
+	php-cs-fixer fix -q $PROJECT/$FILE --rules=@PSR12
 done
 
 echo "Running PHPMD"
 for FILE in $SFILES
 do
-	/opt/homebrew/bin/php -d error_reporting=24575 /opt/homebrew/bin/phpmd $PROJECT/$FILE text cleancode,codesize,controversial,design,naming,unusedcode --exclude tests/*
+    php -d error_reporting=24575 $(phpmd $PROJECT/$FILE text cleancode,codesize,controversial,design,naming,unusedcode)
 	if [ $? != 0 ]
 	then
     echo "Mess Detector Errors Found: Fix or suppress as required"
@@ -65,14 +75,14 @@ done
 echo "Running Code Sniffer..."
 if [ "$FILES" != "" ]
 then
-	/opt/homebrew/bin/phpcs --standard=PSR12 --encoding=utf-8 -n -p $FILES
+	phpcs --standard=PSR12 --encoding=utf-8 -n -p $FILES
 	if [ $? != 0 ]
 	then
 		echo "Coding standards errors have been detected. Running phpcbf..."
-		/opt/homebrew/bin/phpcbf --standard=PSR12 --encoding=utf-8 -n -p $FILES
+		phpcbf --standard=PSR12 --encoding=utf-8 -n -p $FILES
 		git add $FILES
 		echo "Running Code Sniffer again..."
-		/opt/homebrew/bin/phpcs --standard=PSR12 --encoding=utf-8 -n -p $FILES
+		phpcs --standard=PSR12 --encoding=utf-8 -n -p $FILES
 		if [ $? != 0 ]
 		then
 			echo "PHPCS Errors found not fixable automatically"
@@ -84,7 +94,7 @@ fi
 echo "Running Psalm..."
 if [ "$FILES" != "" ]
 then
-	/opt/homebrew/bin/psalm -m --output-format=text $FILES
+	psalm -m --output-format=text $FILES
 	if [ $? != 0 ]
   then
     echo "Psalm Errors found: fix or suppress as required"
@@ -93,9 +103,19 @@ then
 fi
 
 echo "Running PHPUnit tests..."
-XDEBUG_MODE=coverage /opt/homebrew/bin/php ./vendor/bin/phpunit --coverage-html=unitTestCoverage
+XDEBUG_MODE=coverage php ./vendor/bin/phpunit --coverage-html=unitTestCoverage
+if [ $? != 0 ]
+then
+  echo "PHPUnit Errors found"
+  exit 1
+fi
 
 echo "Running local-php-security-checker..."
 local-php-security-checker
+if [ $? != 0 ]
+then
+  echo "Security Check issues found"
+  exit 1
+fi
 
 exit $?
